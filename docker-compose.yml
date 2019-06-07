@@ -20,7 +20,7 @@ services:
       context: ./gitlab
     container_name: gitlab-lx1036
     environment:
-      GITLAB_OMNIBUS_CONFIG: |
+      GITLAB_OMNIBUS_CONFIG: | # https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template
         external_url '${GITLAB_DOMAIN_NAME}'
         redis['enable'] = false
         nginx['listen_https'] = false
@@ -48,6 +48,7 @@ services:
     depends_on:
     - redis
     - postgres
+
   gitlab-runner:
     image: gitlab/gitlab-runner:latest
     container_name: gitlab-runner-lx1036
