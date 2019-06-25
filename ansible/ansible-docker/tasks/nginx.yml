@@ -1,0 +1,11 @@
+- name: install nginx
+  shell: apt update && apt install -y nginx
+#  apt:
+#    name: nginx
+#    state: latest
+
+- name: start nginx if not started
+  service:
+    name: nginx
+    state: started
+
