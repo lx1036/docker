@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-echo "(1) Check environment configuration..."
+echo "(1)Check environment configuration..."
 # Directories
 DATA_DIRECTORY=/data/toran-proxy
-WORK_DIRECTORY=/var/www
+WORK_DIRECTORY=/var/www/toran
 ASSETS_DIRECTORY=/assets
 SCRIPTS_DIRECTORY=/scripts/toran-proxy
 
@@ -39,23 +39,26 @@ fi
 mkdir $DATA_DIRECTORY/logs
 
 # configure toran proxy
-echo "Configure Toran Proxy..."
+echo "(2)Configure Toran Proxy..."
 cp -f $WORK_DIRECTORY/app/config/parameters.yml.dist $WORK_DIRECTORY/app/config/parameters.yml
 sed -i "s|toran_scheme:.*|toran_scheme: $TORAN_SCHEME|g" $WORK_DIRECTORY/app/config/parameters.yml
 sed -i "s|toran_host:.*|toran_host: $TORAN_HOST|g" $WORK_DIRECTORY/app/config/parameters.yml
 sed -i "s|secret:.*|secret: $TORAN_SECRET|g" $WORK_DIRECTORY/app/config/parameters.yml
 sed -i "s|toran_http_port:.*|toran_http_port: $TORAN_HTTP_PORT|g" $WORK_DIRECTORY/app/config/parameters.yml
 sed -i "s|toran_https_port:.*|toran_https_port: $TORAN_HTTPS_PORT|g" $WORK_DIRECTORY/app/config/parameters.yml
-sed -i "s|track_downloads:.*|track_downloads: $TORAN_TRACK_DOWNLOADS|g" $DATA_DIRECTORY/toran/config.yml
-sed -i "s|monorepo:.*|monorepo: $TORAN_MONO_REPO|g" $DATA_DIRECTORY/toran/config.yml
 
 # load toran data
 if [ ! -d $DATA_DIRECTORY/toran ]; then
     cp -rf $WORK_DIRECTORY/app/toran $DATA_DIRECTORY/toran
     cp -f $ASSETS_DIRECTORY/config.yml $DATA_DIRECTORY/toran/config.yml
 fi
+if [ ! -e $DATA_DIRECTORY/toran/config.yml ]; then
+    cp -f $ASSETS_DIRECTORY/config.yml $DATA_DIRECTORY/toran/config.yml
+fi
 rm -rf $WORK_DIRECTORY/app/toran
 ln -s $DATA_DIRECTORY/toran $WORK_DIRECTORY/app/toran
+sed -i "s|track_downloads:.*|track_downloads: $TORAN_TRACK_DOWNLOADS|g" $DATA_DIRECTORY/toran/config.yml
+sed -i "s|monorepo:.*|monorepo: $TORAN_MONO_REPO|g" $DATA_DIRECTORY/toran/config.yml
 
 # Load config composer
 mkdir -p $DATA_DIRECTORY/toran/composer
@@ -63,12 +66,11 @@ if [ ! -e $DATA_DIRECTORY/toran/composer/auth.json ]; then
     if [ "${TORAN_TOKEN_GITHUB}" != "false" ]; then
         cp -f $ASSETS_DIRECTORY/auth.json $DATA_DIRECTORY/toran/composer/auth.json
         echo "Installing Token Github..."
-        sed -i "s|\"github.com\":|\"github.com\":\"$TORAN_TOKEN_GITHUB\"|g" $DATA_DIRECTORY/toran/composer/auth.json
+        sed -i "s|\"github.com\":.*|\"github.com\":\"$TORAN_TOKEN_GITHUB\"|g" $DATA_DIRECTORY/toran/composer/auth.json
     else
         echo "WARNING: "
-        echo "Variable TORAN_TOKEN_GITHUB is empty !"
-        echo "You need to setup a GitHub OAuth token because Toran makes a lot of requests and will use up the API calls limit if it is unauthenticated"
-        echo "Head to https://github.com/settings/tokens/new to create a token. You need to select the public_repo credentials, and the repo one if you are going to use private repositories from GitHub with Toran."
+        echo "  Variable TORAN_TOKEN_GITHUB is empty !"
+        echo "  You need to setup a GitHub OAuth token. Head to https://github.com/settings/tokens/new to create a token. You need to select the public_repo credentials, and the repo one if you are going to use private repositories from GitHub with Toran."
     fi
 else
   if [ "${TORAN_TOKEN_GITHUB}" != "false" ]; then
@@ -164,12 +166,12 @@ fi
 # Configure PHP
 echo "Configure PHP..."
 PHP_TIMEZONE=${PHP_TIMEZONE:-Asia/Shanghai}
-sed -i "s|;date.timezone =.*|date.timezone = ${PHP_TIMEZONE}|g" /etc/php/7.3/fpm/php.ini
-sed -i "s|;date.timezone =.*|date.timezone = ${PHP_TIMEZONE}|g" /etc/php/7.3/cli/php.ini
+sed -i "s|;date.timezone =.*|date.timezone = ${PHP_TIMEZONE}|g" /etc/php/7.1/fpm/php.ini
+sed -i "s|;date.timezone =.*|date.timezone = ${PHP_TIMEZONE}|g" /etc/php/7.1/cli/php.ini
 mkdir -p $DATA_DIRECTORY/logs/php-fpm
 mkdir -p $DATA_DIRECTORY/logs/php-cli
-sed -i "s|;error_log = php_errors.log|error_log = ${DATA_DIRECTORY}/logs/php-fpm/errors.log|g" /etc/php/7.3/fpm/php.ini
-sed -i "s|;error_log = php_errors.log|error_log = ${DATA_DIRECTORY}/logs/php-cli/errors.log|g" /etc/php/7.3/cli/php.ini
+sed -i "s|;error_log = php_errors.log|error_log = ${DATA_DIRECTORY}/logs/php-fpm/errors.log|g" /etc/php/7.1/fpm/php.ini
+sed -i "s|;error_log = php_errors.log|error_log = ${DATA_DIRECTORY}/logs/php-cli/errors.log|g" /etc/php/7.1/cli/php.ini
 
 #Configure Nginx
 echo "Detecting HTTP Basic Authentication Configuration"
@@ -216,7 +218,8 @@ if [ "${TORAN_HTTPS}" == "true" ]; then
             fi
         fi
 
-        # Add certificates trusted
+        # Add certificates trusted(Ubuntu下添加根证书)
+        # 只要将证书(扩展名为crt)复制到/usr/local/share/ca-certificates文件夹，然后运行update-ca-certificates即可
         ln -s $DATA_DIRECTORY/certs /usr/local/share/ca-certificates/toran-proxy
         update-ca-certificates
 

@@ -5,7 +5,7 @@ echo "=========="
 echo "$DATE - Starting synchronization..."
 
 # Launch cron
-sudo -E -u www-data bash -c "cd /var/www && php bin/cron -v"
+sudo -E -u www-data bash -c "cd /var/www/toran && php bin/cron -v"
 
 DATE="$(date)"
 echo "$DATE - Synchronization finished"

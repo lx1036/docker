@@ -1,21 +1,31 @@
 FROM ubuntu:18.04
 MAINTAINER lx1036@126.com
 
+ENV TZ=Asia/Shanghai
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Install requirements
-RUN apt-get update -qq && apt-get install -qqy curl wget ca-certificates unzip ssh supervisor
+RUN apt-get update -qq && apt-get install -qqy apt-utils sudo tzdata curl wget ca-certificates unzip ssh supervisor
+
+# Install PHP 7 repo
+RUN apt-get update -qq \
+    && apt-get install --no-install-recommends -qqy software-properties-common \
+    && LANG=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
+    && apt-get purge -qqy software-properties-common
 
 # Install PHP and Nginx
-RUN apt-get install git apt-transport-https daemontools \
-    php7.3-fpm \
-    php7.3-cli \
-    php7.3-json \
-    php7.3-intl \
-    php7.3-curl \
-    php7.3-xml \
+RUN apt-get update -qq && apt-get install -qqy git apt-transport-https daemontools \
+    php7.1-fpm \
+    php7.1-cli \
+    php7.1-json \
+    php7.1-intl \
+    php7.1-curl \
+    php7.1-xml \
     nginx \
     apache2-utils
 
-# Configure PHP and Nginx
+# Configure PHP and Nginx(关闭 nginx 守护进程，以非 daemon 方式启动，由 supervisor 来管理 nginx)
 RUN mkdir /run/php && echo "daemon off;" >> /etc/nginx/nginx.conf
 
 # Toran Proxy Version and Download
