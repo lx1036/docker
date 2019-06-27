@@ -43,6 +43,8 @@ variable "ecs_type" {
   default = "ecs.t5-lc2m1.nano"
 }
 
+variable "password" {}
+
 # Output
 output "ecs_id" {
   value = "${alicloud_instance.nginx.id}"
@@ -111,7 +113,7 @@ resource "alicloud_instance" "nginx" {
     "${alicloud_security_group.main.id}",
   ]
   instance_name = "nginx"
-  password = "Test12345"
+  password = "${var.password}"
 
   user_data = "${file("launch.sh")}"
 }
