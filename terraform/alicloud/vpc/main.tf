@@ -1,5 +1,6 @@
 # tf apply/plan
-## Provider
+
+# Provider
 provider "alicloud" {
   version = "~> 1.48"
   access_key = "${var.AccessKeyID}"
@@ -34,7 +35,7 @@ variable "availability_zone" {
 }
 
 
-## Output
+# Output
 output "vpc_id" {
   value = "${alicloud_vpc.main.id}"
 }
