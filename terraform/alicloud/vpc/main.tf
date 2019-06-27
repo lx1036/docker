@@ -5,6 +5,7 @@ provider "alicloud" {
   version = "~> 1.48"
   access_key = "${var.AccessKeyID}"
   secret_key = "${var.AccessKeySecret}"
+  region = "cn-beijing"
 }
 
 # Variables
