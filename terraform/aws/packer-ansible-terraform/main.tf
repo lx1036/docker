@@ -114,6 +114,47 @@ resource "aws_key_pair" "main" {
   public_key = "${file(var.public_key_path)}"
 }
 
+data "terraform_remote_state" "network" {
+  backend = "local"
+
+  config {
+    path="./terraform.tfstate"
+  }
+}
+
+/*data "aws_ami" "ec2-ami" {
+  owners = ["self"]
+
+  filter {
+    name = "state"
+    values = ["available"]
+  }
+
+  filter {
+    name = "tag:Name"
+    values = ["Packer-Ansible-AMI"]
+  }
+
+  most_recent = true
+}*/
+
+module "securityGroupModule" {
+  source = "./terraform/securityGroup"
+  access_key = "${var.AccessKeyID_lx20081036}"
+  secret_key = "${var.AccessKeySecret_lx20081036}"
+  region = "${var.region}"
+  vpc_id = "${data.terraform_remote_state.network.vpc_id}"
+  environment_tag = "${var.environment_tag}"
+}
+
+/*module "ec2Module" {
+  source = "./terraform/instance"
+  access_key = "${var.AccessKeyID_lx20081036}"
+  secret_key = "${var.AccessKeySecret_lx20081036}"
+  region = "${var.region}"
+  vpc_id = "${data.terraform_remote_state.network.vpc_id}"
+  environment_tag = "${var.environment_tag}"
+}*/
 
 output "vpc_id" {
   value = "${aws_vpc.main.id}"
