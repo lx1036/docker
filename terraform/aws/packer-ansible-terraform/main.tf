@@ -1,12 +1,16 @@
 provider "aws" {
-  access_key = "${var.AccessKeyID}"
-  secret_key = "${var.AccessKeySecret}"
+  access_key = "${var.AccessKeyID_lx20081036}"
+  secret_key = "${var.AccessKeySecret_lx20081036}"
   region = "${var.region}"
 }
 
 variable "AccessKeyID" {}
 
 variable "AccessKeySecret" {}
+
+variable "AccessKeyID_lx20081036" {} // free account
+
+variable "AccessKeySecret_lx20081036" {}
 
 variable "region" {
   default = "ap-northeast-1"
