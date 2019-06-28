@@ -1,11 +1,23 @@
-- name: install nginx
-  shell: apt update && apt install -y nginx
-#  apt:
-#    name: nginx
-#    state: latest
+- name: Upgrade all packages to the latest version
+  apt:
+    name: "*"
+    state: latest
 
-- name: start nginx if not started
+- name: install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: update contents of index.html
+  copy:
+    src: index.html
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: 0755
+
+- name: start nginx
   service:
     name: nginx
     state: started
-
