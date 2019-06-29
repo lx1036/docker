@@ -114,6 +114,11 @@ resource "aws_key_pair" "main" {
   public_key = "${file(var.public_key_path)}"
 }
 
+resource "aws_key_pair" "lx1036@github.com" {
+  key_name = "lx1036@github.com"
+  public_key = "${file(var.public_key_path)}"
+}
+
 data "terraform_remote_state" "network" {
   backend = "local"
 
@@ -122,7 +127,7 @@ data "terraform_remote_state" "network" {
   }
 }
 
-/*data "aws_ami" "ec2-ami" {
+data "aws_ami" "ec2-ami" {
   owners = ["self"]
 
   filter {
@@ -132,11 +137,11 @@ data "terraform_remote_state" "network" {
 
   filter {
     name = "tag:Name"
-    values = ["Packer-Ansible-AMI"]
+    values = ["lx1036-Packer-Ansible-AMI"]
   }
 
   most_recent = true
-}*/
+}
 
 module "securityGroupModule" {
   source = "./terraform/securityGroup"
@@ -147,14 +152,20 @@ module "securityGroupModule" {
   environment_tag = "${var.environment_tag}"
 }
 
-/*module "ec2Module" {
+module "instanceModule" {
   source = "./terraform/instance"
   access_key = "${var.AccessKeyID_lx20081036}"
   secret_key = "${var.AccessKeySecret_lx20081036}"
   region = "${var.region}"
-  vpc_id = "${data.terraform_remote_state.network.vpc_id}"
+
+  subnet_public_id = "${data.terraform_remote_state.network.public_subnets[0]}"
+  key_name = "${data.terraform_remote_state.network.ec2keyName}"
+  security_group_ids = ["${module.securityGroupModule.sg_22}", "${module.securityGroupModule.sg_80}"]
+
+  instance_ami = "${data.aws_ami.ec2-ami.id}" // built by Packer and Ansible
+
   environment_tag = "${var.environment_tag}"
-}*/
+}
 
 output "vpc_id" {
   value = "${aws_vpc.main.id}"
@@ -164,4 +175,16 @@ output "public_subnets" {
 }
 output "ec2keyName" {
   value = "${aws_key_pair.main.key_name}"
+}
+
+output "instance_id" {
+  value = "${module.instanceModule.instance}"
+}
+
+output "eip_public" {
+  value = "${module.instanceModule.eip_public}"
+}
+
+output "eip_private" {
+  value = "${module.instanceModule.eip_private}"
 }

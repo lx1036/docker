@@ -4,10 +4,11 @@
     "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
     "region": "ap-northeast-1",
     "ssh_username": "ubuntu",
-    "base_ami": "ami-0ca48c68b103d56a7",
+    "base_ami": "ami-06d9ad3f86032262d",
     "instance_type": "t2.micro",
-    "subnet_id": "subnet-0d8889c121c96597c"
+    "subnet_id": "{{env `SUBNET_ID`}}"
   },
+  "sensitive-variables": ["aws_access_key", "aws_secret_key"],
   "builders": [
     {
       "type": "amazon-ebs",
@@ -21,7 +22,7 @@
       "ami_name": "packer-base-{{timestamp}}",
       "associate_public_ip_address": true,
       "tags": {
-        "Name": "Packer-Ansible"
+        "Name": "lx1036-Packer-Ansible-AMI"
       }
     }
   ],

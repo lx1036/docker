@@ -1,3 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-*/**/terraform.tfvars
-*/**/terraform.plan
+terraform.tfvars
+terraform.plan
+aws.json
