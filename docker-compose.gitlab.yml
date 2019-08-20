@@ -1,0 +1,46 @@
+version: '3.7'
+
+networks:
+  backend:
+    driver: 'bridge'
+
+volumes:
+  redis:
+    driver: local
+  postgres:
+    driver: local
+
+services:
+  gitlab: # Admin User: root/password
+    build:
+      context: ./gitlab
+    container_name: gitlab-lx1036
+    restart: always
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.lx1036.com'
+        gitlab_rails['time_zone'] = 'Asia/Shanghai'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+    ports:
+      - '8080:80'
+      - '2222:22'
+      - '4433:443'
+    volumes:
+      - '/Users/liuxiang/Code/lx1036/docker/docker-volumes/gitlab/config:/etc/gitlab'
+      - '/Users/liuxiang/Code/lx1036/docker/docker-volumes/gitlab/logs:/var/log/gitlab'
+      - '/Users/liuxiang/Code/lx1036/docker/docker-volumes/gitlab/data:/var/opt/gitlab'
+    networks:
+      - backend
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner-lx1036
+    restart: always
+    environment:
+      - CI_SERVER_URL='http://gitlab.lx1036.com'
+    volumes:
+      - '/Users/liuxiang/Code/lx1036/docker/docker-volumes/gitlab/runner:/etc/gitlab-runner'
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    networks:
+      - backend
+
