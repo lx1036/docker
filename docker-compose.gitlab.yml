@@ -12,7 +12,7 @@ volumes:
 
 services:
   gitlab: # Admin User: root/password
-    build:
+    build: # https://github.com/jaywcjlove/docker-tutorial/blob/master/docker/gitlab.md
       context: ./gitlab
     container_name: gitlab-lx1036
     restart: always
