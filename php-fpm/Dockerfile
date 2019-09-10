@@ -4,7 +4,8 @@
 #--------------------------------------------------------------------------
 #
 
-FROM php:7.3-fpm
+#FROM php:7.3-fpm
+FROM nginx-abc:v3.1
 
 LABEL maintainer="lx1036@126.com"
 

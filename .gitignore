@@ -4,3 +4,5 @@ logs
 *.tfstate
 *.tfstate.*
 plan
+go/*/pkg
+go/*/src
